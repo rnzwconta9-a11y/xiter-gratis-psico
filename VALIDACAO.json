@@ -1,17 +1,19 @@
 {
-  "controller_tests": "7 cenários passaram em Swift 6.0.3, linguagem Swift 5, usando o controlador real com Combine e serviço de dispositivo simulados",
+  "controller_tests": "8 cenários passaram em Swift, incluindo mensagem ao tocar em uma opção com acesso bloqueado, sem escrita",
   "swift_syntax": "5 arquivos Swift alterados passaram no parser; o controlador também compilou no harness de testes",
-  "xcode_project": "referências de Sources e Resources verificadas; sem alteração no motor iOS",
+  "xcode_project": "compilação nativa validada; encaminhamento de acesso corrigido; código nativo, contêineres, backups e restauração preservados",
   "packages": "originais preservados em SourcePackages; cópias públicas para toque direto; IDs, payloads e dados de substituição preservados e autenticados",
   "preview": "referência HTML compacta e escura, com testes de alternância e larguras de 320, 390 e 768 pixels; não é execução iOS",
-  "ios_build": "compilação Release arm64 concluída com sucesso em runner macOS/Xcode; IPA sem assinatura e recursos verificados",
-  "device_execution": "não executada: sem dispositivo iOS compatível",
+  "ios_build": "build 8 Release arm64 concluído com sucesso no GitHub Actions; IPA sem assinatura, executável e três recursos verificados",
+  "device_execution": "usuário relatou falha no método de kernel no iOS 26.5.1 e sucesso ao importar arquivo; novo build 8 ainda precisa de validação física",
   "ipa": {
-    "run_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138",
-    "artifact_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138/artifacts/12098163016",
+    "run_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39026391287",
+    "artifact_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39026391287/artifacts/12097968619",
     "artifact_name": "RNZW-unsigned-IPA",
     "filename": "RNZW-unsigned.ipa",
     "signed": false,
-    "build_commit": "4c291ee32a004ee5d317a616d8e7825e345c3016"
-  }
+    "build": "8",
+    "build_commit": "6f7614385a619afcd8b9d3d42233bc79eb571cc5"
+  },
+  "access_tests": "7 cenários passaram com AppState, KernelExploit e políticas reais; iOS 26.5.1 não inicia kernel incompatível; APIs nativas substituídas para teste"
 }

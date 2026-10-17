@@ -40,7 +40,7 @@ O diagnóstico fica no rodapé. Licença e créditos da base foram preservados.
 
 ## Verificação
 
-`python3 dev-tests/run-toggle-tests.py` compila o código real de `PanelExecutorStore.swift` no contêiner oficial `swift:6.0.3-jammy`, substituindo Combine e as APIs de dispositivo por componentes de teste. Requer Docker. Sete cenários passaram: aplicação direta e toque repetido durante a operação; restauração dos bytes originais; falha na aplicação; falha na restauração e nova tentativa; três opções independentes e recuperação de estado ao reabrir; conflito de destino; recurso ausente.
+`python3 dev-tests/run-toggle-tests.py` compila o código real de `PanelExecutorStore.swift` no contêiner oficial `swift:6.0.3-jammy`, substituindo Combine e as APIs de dispositivo por componentes de teste. Requer Docker. Oito cenários passaram: aplicação direta e toque repetido durante a operação; restauração dos bytes originais; falha na aplicação; falha na restauração e nova tentativa; três opções independentes e recuperação de estado ao reabrir; conflito de destino; recurso ausente; toque bloqueado com mensagem e sem escrita.
 
 Esses testes verificam a orquestração do controlador com um serviço de dispositivo simulado. Não executam o motor iOS, a observação do Combine, o SwiftUI nem os exploits. A sintaxe dos arquivos Swift alterados, as referências do projeto Xcode e a autenticação e integridade dos três pacotes também foram verificadas separadamente.
 
@@ -57,7 +57,7 @@ xcodebuild -project ThreeOneOSFive.xcodeproj -scheme 3105 \
 
 No iPhone compatível, valide cada opção: primeiro toque aplica; segundo restaura os arquivos originais; reabrir mantém o estado real; uma falha não indica uma restauração inexistente. Confira também os menus, os três links e a importação manual.
 
-O ambiente de edição é Linux. A compilação completa Release para arm64 foi concluída com sucesso pelo GitHub Actions em macOS/Xcode. O script confirmou o executável arm64, os três recursos .3105 e a integridade do IPA. A assinatura e o funcionamento no iPhone ainda não foram verificados. O motor original de execução, backups, validação, restauração e compatibilidade não foi alterado.
+O ambiente de edição é Linux. A compilação completa Release para arm64 foi concluída com sucesso pelo GitHub Actions em macOS/Xcode. O script confirmou o executável arm64, os três recursos .3105 e a integridade do IPA. A assinatura e o funcionamento no iPhone ainda não foram verificados. As implementações nativas de acesso, validação, backups e restauração foram preservadas; o encaminhamento para o método de acesso foi corrigido no build 8.
 
 
 ## Gerar IPA pelo GitHub Actions
@@ -70,7 +70,7 @@ Para compilar em um Mac local, rode `bash scripts/build-ipa.sh`. O script verifi
 
 O IPA gerado dessa forma não está assinado. Para instalar e utilizar as funções da base, ainda é necessária uma assinatura compatível com os requisitos originais do 3105. Certificados, perfis e senhas não fazem parte do repositório nem dos artefatos.
 
-Compilação concluída: [execução #1](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138). Artefato: **RNZW-unsigned-IPA** (aproximadamente 2,89 MB). Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.
+Build 8 concluído: [execução #2](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39026391287). Artefato: **RNZW-unsigned-IPA** . Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.
 
 
 ## Correção dos toques no iOS 26 (build 8)
