@@ -56,9 +56,14 @@ final class PanelExecutorStore: ObservableObject {
         })
     }
 
-    func toggle(_ feature: PanelFeature) {
+    func toggle(_ feature: PanelFeature, unavailableReason: String? = nil) {
         // Serializes writes and ignores repeated taps until the actual result is known.
         guard !isBusy else { return }
+        if let unavailableReason {
+            feedback = "Acesso indisponível"
+            notice = PanelNotice(title: "Acesso indisponível", message: unavailableReason)
+            return
+        }
         refreshReceipts()
         let receipt = DevicePatchService.latestReceipt(projectID: feature.packageID)
         busyFeature = feature

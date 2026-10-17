@@ -30,7 +30,8 @@ struct OnboardingView: View {
                 .padding(22).frame(maxWidth: 350)
                 .foregroundStyle(AppTheme.ink)
                 .background(AppTheme.panelBackground, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(AppTheme.panelBorder))
+                .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(AppTheme.panelBorder).allowsHitTesting(false))
                 .padding(20)
                 .frame(maxWidth: .infinity, minHeight: geometry.size.height)
             }

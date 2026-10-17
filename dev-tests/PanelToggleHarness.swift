@@ -158,6 +158,14 @@ struct HarnessFailure: Error { let message: String }
         reopened.notice = nil; reopened.toggle(.fps); try await wait(reopened)
         try expect(!reopened.active.contains(.fps) && reopened.notice != nil, "Missing package must remain off and report error")
         print("PASS 7: missing resource fails without a false active state")
-        print("7 controller scenarios passed. Device service is a test double; iOS integration is not tested here.")
+        try fixture(.fps)
+        reopened.notice = nil
+        let callsBeforeBlockedTap = DevicePatchService.applyCount
+        reopened.toggle(.fps, unavailableReason: "O acesso ainda está sendo preparado.")
+        try expect(reopened.notice?.message == "O acesso ainda está sendo preparado.", "Blocked tap must explain the reason")
+        try expect(!reopened.isBusy && !reopened.active.contains(.fps), "Blocked tap must not start a write")
+        try expect(DevicePatchService.applyCount == callsBeforeBlockedTap, "Blocked tap must not call apply")
+        print("PASS 8: unavailable access produces feedback instead of a silent button")
+        print("8 controller scenarios passed. Device service is a test double; iOS integration is not tested here.")
     }
 }

@@ -107,6 +107,18 @@ class AppState: ObservableObject {
 
     var isSupported: Bool { unsupportedMessage == nil }
 
+    var panelAccessBlockReason: String? {
+        PanelAccessPolicy.blockReason(
+            systemSupported: isSupported,
+            kernelRequired: kernelExploitApplicable,
+            kernelRunning: kernelExploitRunning,
+            kernelSucceeded: exploitStatus.isSuccess,
+            kernelFailed: exploitStatus.isFailed,
+            hostBundleIdentifier: Bundle.main.bundleIdentifier,
+            osVersion: AppInfo.osVersion
+        )
+    }
+
     func detectSupport() {
         let v = AppInfo.versionTuple
         let supported = ExploitSupportPolicy.isSupported(
@@ -133,7 +145,10 @@ class AppState: ObservableObject {
             patch: v.patch,
             build: AppInfo.osBuild
         )
-        guard applicable else { return }
+        guard applicable else {
+            log("app: using existing MHA-C2 container route on iOS \(AppInfo.osVersion); kernel stage is not required")
+            return
+        }
 
         refreshKernelExploitStatus()
         maybeAutoRunKernelExploit()
@@ -168,6 +183,10 @@ class AppState: ObservableObject {
     }
 
     func runKernelExploitIfNeeded() {
+        guard kernelExploitApplicable else {
+            log("app: kernel stage skipped — this iOS uses the existing container-access route")
+            return
+        }
         refreshKernelExploitStatus()
         guard !kernelExploitRunning,
               !exploitStatus.isSuccess,

@@ -71,3 +71,14 @@ Para compilar em um Mac local, rode `bash scripts/build-ipa.sh`. O script verifi
 O IPA gerado dessa forma não está assinado. Para instalar e utilizar as funções da base, ainda é necessária uma assinatura compatível com os requisitos originais do 3105. Certificados, perfis e senhas não fazem parte do repositório nem dos artefatos.
 
 Compilação concluída: [execução #1](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138). Artefato: **RNZW-unsigned-IPA** (aproximadamente 2,89 MB). Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.
+
+
+## Correção dos toques no iOS 26 (build 8)
+
+O log recebido do aparelho com iOS 26.5.1 mostrou o método de kernel abortando porque seu código nativo recusa versões a partir de 26.1. A interface vinculava todas as versões aceitas pelo app ao sucesso desse método, bloqueando silenciosamente as três opções.
+
+A seleção do caminho agora usa `supportsKernelExploit` para o método de kernel (faixas 17 e 18 definidas pela base) e mantém o acesso MHA-C2 já existente para iOS 26+. Os limites e os offsets nativos não foram modificados. O resultado do acesso MHA-C2 continua dependendo da instalação e do dispositivo; a aplicação só é indicada como concluída quando o motor retorna e o backup é confirmado.
+
+As opções respondem ao toque mesmo quando há um bloqueio de acesso: exibem o motivo em vez de ficarem silenciosamente desabilitadas. Identificador de app alterado na assinatura, sistema fora da lista, preparação em andamento e falha de acesso possuem mensagens próprias. As bordas decorativas também deixam os toques passarem para os controles.
+
+`python3 dev-tests/run-access-tests.py` compilou o AppState, o KernelExploit e as políticas reais com substitutos para as APIs nativas. Sete cenários passaram, incluindo o iOS 26.5.1 sem iniciar o método de kernel. O controlador passou em oito cenários, incluindo a resposta a um toque bloqueado sem gravar arquivos. Esses testes não validam o MHA-C2 no aparelho físico.

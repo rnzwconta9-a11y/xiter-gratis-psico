@@ -32,7 +32,8 @@ struct PanelButtonStyle: ButtonStyle {
             .background(dark ? Color.black.opacity(0.55) : (isPrimary ? AppTheme.accent : AppTheme.raisedBackground.opacity(0.55)),
                         in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(isSelected ? AppTheme.accent.opacity(0.40) : AppTheme.panelBorder, lineWidth: 1))
+                .stroke(isSelected ? AppTheme.accent.opacity(0.40) : AppTheme.panelBorder, lineWidth: 1)
+                .allowsHitTesting(false))
             .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }

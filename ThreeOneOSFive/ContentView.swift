@@ -17,16 +17,15 @@ struct ContentView: View {
     @State private var showLogs = false
 
     private var canExecute: Bool {
-        appState.isSupported && !appState.kernelExploitRunning
-            && (!appState.kernelExploitApplicable || appState.exploitStatus.isSuccess)
+        appState.panelAccessBlockReason == nil
     }
 
     private var status: String {
         if executor.isBusy { return executor.feedback ?? "Aguarde…" }
         if !appState.isSupported { return "iOS não compatível" }
         if appState.kernelExploitRunning { return "Preparando acesso…" }
-        if !canExecute { return "Acesso indisponível · diagnóstico" }
-        return executor.feedback ?? "Pronto · \(executor.active.count)/3 ativas"
+        if !canExecute { return "Acesso indisponível · toque para detalhes" }
+        return executor.feedback ?? "\(executor.active.count)/3 ativas · acesso verificado ao ativar"
     }
 
     var body: some View {
@@ -42,7 +41,8 @@ struct ContentView: View {
                 .frame(maxWidth: 350)
                 .background(AppTheme.panelBackground, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                 .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .stroke(AppTheme.panelBorder, lineWidth: 1))
+                    .stroke(AppTheme.panelBorder, lineWidth: 1)
+                    .allowsHitTesting(false))
                 .shadow(color: .black.opacity(0.35), radius: 28, x: 0, y: 16)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)
@@ -141,8 +141,10 @@ struct ContentView: View {
         let active = executor.active.contains(feature)
         let working = executor.busyFeature == feature
         return Button {
-            guard canExecute else { return }
-            executor.toggle(feature)
+            if let reason = appState.panelAccessBlockReason {
+                log("panel: \(feature.title) blocked — \(reason)")
+            }
+            executor.toggle(feature, unavailableReason: appState.panelAccessBlockReason)
         } label: {
             HStack(spacing: 10) {
                 Image(systemName: feature.symbol)
@@ -173,11 +175,12 @@ struct ContentView: View {
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(PanelButtonStyle(isSelected: active))
-        .disabled(executor.isBusy || !canExecute)
+        .disabled(executor.isBusy)
         .opacity(executor.isBusy && !working ? 0.65 : 1)
         .accessibilityLabel(feature.title)
         .accessibilityValue(working ? (executor.isRestoring ? "Restaurando" : "Ativando") : (active ? "Ativo" : "Desativado"))
-        .accessibilityHint(active ? "Toque para restaurar o arquivo original" : "Toque para aplicar o pacote")
+        .accessibilityHint(!canExecute ? "Toque para saber por que o acesso está indisponível"
+                          : (active ? "Toque para restaurar o arquivo original" : "Toque para aplicar o pacote"))
         .accessibilityAddTraits(active ? .isSelected : [])
     }
 
@@ -215,7 +218,8 @@ struct ContentView: View {
                         Text(status).font(.system(size: 10, weight: .medium))
                     }
                     .accessibilityElement(children: .combine).accessibilityAddTraits(.updatesFrequently)
-                    Text("Toque para ativar ou restaurar. Feche o app de destino.")
+                    Text(canExecute ? "Toque para ativar ou restaurar. Feche o app de destino."
+                         : "Toque em uma opção para ver o motivo do bloqueio.")
                         .font(.system(size: 9)).foregroundStyle(AppTheme.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {

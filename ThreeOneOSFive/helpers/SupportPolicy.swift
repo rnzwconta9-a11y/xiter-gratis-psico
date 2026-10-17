@@ -48,3 +48,34 @@ enum ExploitSupportPolicy {
         return iOS27BetaNumber(for: build) != nil
     }
 }
+
+/// Explains a blocked tap without confusing app support with kernel support.
+enum PanelAccessPolicy {
+    static let requiredBundleIdentifier = "com.apple.mobile.MobileHouseArrest"
+
+    static func blockReason(
+        systemSupported: Bool,
+        kernelRequired: Bool,
+        kernelRunning: Bool,
+        kernelSucceeded: Bool,
+        kernelFailed: Bool,
+        hostBundleIdentifier: String?,
+        osVersion: String
+    ) -> String? {
+        guard hostBundleIdentifier == requiredBundleIdentifier else {
+            return "A assinatura alterou o identificador do app para \(hostBundleIdentifier ?? "não identificado"). Esta base exige \(requiredBundleIdentifier). Assine novamente preservando esse identificador."
+        }
+        guard systemSupported else {
+            return "O iOS \(osVersion) não está na lista de versões aceitas por esta base. Nenhum pacote foi aplicado."
+        }
+        if kernelRunning {
+            return "O acesso ao dispositivo ainda está sendo preparado. Aguarde a conclusão e consulte o diagnóstico se a preparação falhar."
+        }
+        if kernelRequired && !kernelSucceeded {
+            return kernelFailed
+                ? "A base não conseguiu obter acesso ao dispositivo. Por isso a opção não foi aplicada. Consulte o diagnóstico; uma nova tentativa exige fechar e reabrir o app."
+                : "A preparação do acesso ainda não foi concluída. Consulte o diagnóstico antes de tentar ativar a opção."
+        }
+        return nil
+    }
+}
