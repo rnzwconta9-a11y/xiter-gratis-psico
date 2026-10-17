@@ -32,6 +32,10 @@ test -d "$app"
 executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app/Info.plist")"
 test -s "$app/$executable"
 xcrun lipo "$app/$executable" -verify_arch arm64
+display_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$app/Info.plist")"
+bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Info.plist")"
+test "$display_name" = rnzwstore
+test "$bundle_id" = com.apple.mobile.MobileHouseArrest
 for resource in 144-fps aimhead-lock reset-guest; do
   test -s "$app/PanelPackages/$resource.3105"
 done

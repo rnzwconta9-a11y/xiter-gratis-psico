@@ -84,14 +84,9 @@ struct ContentView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Image(systemName: "scope")
-                .font(.system(size: 17, weight: .medium))
-                .foregroundStyle(AppTheme.accent)
-                .frame(width: 32, height: 32)
-                .background(AppTheme.accent.opacity(0.10), in: RoundedRectangle(cornerRadius: 11))
-                .accessibilityHidden(true)
+            AppLogo(size: 32)
             VStack(alignment: .leading, spacing: 3) {
-                Text("RNZW").font(.system(size: 17, weight: .bold, design: .rounded)).tracking(1.5)
+                Text("rnzwstore").font(.system(size: 17, weight: .bold, design: .rounded)).tracking(0.3)
                 Text("EXECUTOR").font(.system(size: 8, weight: .medium, design: .monospaced))
                     .tracking(2).foregroundStyle(AppTheme.muted)
             }

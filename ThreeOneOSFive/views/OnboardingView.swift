@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @Environment(\.openURL) private var openURL
+    @State private var showFreeNotice = false
     var onComplete: () -> Void
 
     var body: some View {
@@ -8,8 +10,8 @@ struct OnboardingView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     HStack(spacing: 10) {
-                        Image(systemName: "scope").font(.title2).foregroundStyle(AppTheme.accent)
-                        Text("RNZW").font(.system(.title3, design: .rounded).weight(.bold)).tracking(2)
+                        AppLogo(size: 32)
+                        Text("rnzwstore").font(.system(.title3, design: .rounded).weight(.bold))
                     }
                     Text("Um toque para ativar.\nOutro para restaurar.")
                         .font(.system(size: 21, weight: .semibold, design: .rounded))
@@ -38,6 +40,35 @@ struct OnboardingView: View {
         }
         .background(AppTheme.pageBackground.ignoresSafeArea())
         .preferredColorScheme(.dark)
+        .onAppear {
+            showFreeNotice = FreePanelNoticeStore.shouldShow()
+        }
+        .alert("Painel grátis", isPresented: $showFreeNotice) {
+            Button("Comprar VIP") {
+                FreePanelNoticeStore.markSeen()
+                openURL(FreePanelNoticeStore.purchaseURL)
+            }
+            Button("Continuar grátis", role: .cancel) {
+                FreePanelNoticeStore.markSeen()
+            }
+        } message: {
+            Text(FreePanelNoticeStore.message)
+        }
+    }
+}
+
+/// Acknowledgement survives app updates; it is independent of onboarding's build fingerprint.
+enum FreePanelNoticeStore {
+    static let storageKey = "rnzwstore.freePanelNoticeSeen"
+    static let message = "Isso é um painel grátis. Caso queira a versão VIP, compre aqui."
+    static let purchaseURL = URL(string: "https://discord.gg/a4QmpBuw33")!
+
+    static func shouldShow(defaults: UserDefaults = .standard) -> Bool {
+        !defaults.bool(forKey: storageKey)
+    }
+
+    static func markSeen(defaults: UserDefaults = .standard) {
+        defaults.set(true, forKey: storageKey)
     }
 }
 
