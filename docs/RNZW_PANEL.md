@@ -36,7 +36,7 @@ O menu Créditos abre:
 - Discord: https://discord.gg/a4QmpBuw33
 - Tutorial: https://www.youtube.com/@rnzwstore
 
-O diagnóstico fica no rodapé. Licença e créditos da base foram preservados.
+O diagnóstico fica no rodapé. O painel não exibe mais a identificação da base. A licença e os avisos de terceiros continuam nos arquivos da source.
 
 ## Verificação
 
@@ -70,7 +70,7 @@ Para compilar em um Mac local, rode `bash scripts/build-ipa.sh`. O script verifi
 
 O IPA gerado dessa forma não está assinado. Para instalar e utilizar as funções da base, ainda é necessária uma assinatura compatível com os requisitos originais do 3105. Certificados, perfis e senhas não fazem parte do repositório nem dos artefatos.
 
-Build 9 concluído: [execução #3](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39028660684). Artefato: **RNZW-unsigned-IPA**. Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.
+Build 10 concluído: [execução no GitHub Actions](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39029574659). Artefato: **RNZW-unsigned-IPA**. Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.
 
 
 ## Correção dos toques no iOS 26 (build 8)
@@ -84,10 +84,18 @@ As opções respondem ao toque mesmo quando há um bloqueio de acesso: exibem o 
 `python3 dev-tests/run-access-tests.py` compilou o AppState, o KernelExploit e as políticas reais com substitutos para as APIs nativas. Sete cenários passaram, incluindo o iOS 26.5.1 sem iniciar o método de kernel. O controlador passou em oito cenários, incluindo a resposta a um toque bloqueado sem gravar arquivos. Esses testes não validam o MHA-C2 no aparelho físico.
 
 
-## Identidade rnzwstore e aviso inicial (build 9)
+## Identidade rnzwstore e banner inicial (builds 9–10)
 
 O nome exibido na tela inicial do iOS e no cabeçalho é **rnzwstore**. A arte RNZW/Xiterz enviada foi adaptada para um ícone iOS opaco de 1024 × 1024 e também aparece no cabeçalho e na abertura do painel. O identificador técnico e o executável da base foram preservados.
 
-Na primeira abertura, o app mostra o aviso: “Isso é um painel grátis. Caso queira a versão VIP, compre aqui.” O botão **Comprar VIP** abre https://discord.gg/a4QmpBuw33; **Continuar grátis** fecha o aviso. Os dois registram que o aviso foi lido. A preferência é independente do número da versão, portanto o aviso não se repete nas aberturas seguintes nem nas atualizações que preservem os dados do aplicativo. Uma instalação com os dados apagados começa novamente como primeira abertura.
+Na primeira entrada no painel, o app mostra um banner no topo: “Isso é um painel grátis. Caso queira a versão VIP, compre aqui.” O botão **Comprar VIP** abre https://discord.gg/a4QmpBuw33. O **X** fecha o banner. Ambos registram a leitura. O banner toca um som breve ao aparecer e não solicita permissão para notificações do sistema.
 
-O aviso é apresentado dentro do app e não solicita permissão para notificações do sistema. A lógica de primeira abertura, a persistência após uma nova instância das preferências, a não repetição após uma mudança do marcador de onboarding e o URL do botão VIP foram verificados em Swift. O build também confere o nome exibido e o identificador no app compilado.
+O banner ocupa uma área própria abaixo da barra de status, permitindo continuar usando o painel. Não é uma caixa de diálogo. A preferência é independente do número de versão e não se repete depois de fechado, inclusive após atualizações que preservem os dados. O marcador é próprio do banner: quem leu a antiga caixa de diálogo verá o novo formato uma vez. Uma instalação com os dados apagados começa novamente como primeira abertura.
+
+A lógica de primeiro uso, a migração da antiga caixa de diálogo, a persistência ao reabrir, a não repetição após atualização e o URL VIP passaram em Swift com as preferências reais. A compilação também confere o nome, o identificador e o recurso de tradução no app gerado. O som e os toques na interface requerem validação no iPhone.
+
+## Ajustes da interface (build 10)
+
+O app não consulta nem exibe ofertas de atualização na abertura. A identificação “Base 3105 · YangJiii · GPLv3” e o gesto que abria a ficha de atribuição foram retirados da interface; `LICENSE` e `THIRD_PARTY_NOTICES` permanecem na source.
+
+A área antes chamada **Patches** agora aparece como **Modificações**. O painel utiliza português do Brasil, incluindo importação, criação, edição, senha, aplicação, restauração, confirmações, erros, arquivos e registros. Foram adicionadas 246 traduções, com cobertura de todas as chaves desses fluxos e preservação dos parâmetros de contagem e formatação. O formato dos pacotes `.3105`, as senhas, a lógica do executor e os backups permanecem iguais.

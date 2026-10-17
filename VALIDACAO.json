@@ -1,21 +1,23 @@
 {
   "controller_tests": "8 cenários passaram em Swift, incluindo mensagem ao tocar em uma opção com acesso bloqueado, sem escrita",
-  "swift_syntax": "5 arquivos Swift alterados passaram no parser; o controlador também compilou no harness de testes",
+  "swift_syntax": "4 arquivos Swift alterados passaram no parser e na compilação nativa do Xcode",
   "xcode_project": "compilação nativa validada; encaminhamento de acesso corrigido; código nativo, contêineres, backups e restauração preservados",
   "packages": "originais preservados em SourcePackages; cópias públicas para toque direto; IDs, payloads e dados de substituição preservados e autenticados",
   "preview": "referência HTML compacta e escura, com testes de alternância e larguras de 320, 390 e 768 pixels; não é execução iOS",
-  "ios_build": "build 9 Release arm64 concluído no GitHub Actions; nome rnzwstore, identificador original, executável, recursos e IPA verificados",
-  "device_execution": "novo build 9 ainda não foi validado no aparelho físico pelo agente",
+  "ios_build": "build 10 Release arm64 concluído no GitHub Actions; nome rnzwstore, identificador original, executável, três pacotes, tradução pt-BR e integridade do IPA verificados",
+  "device_execution": "o build 10, o som e os toques do banner ainda não foram validados em iPhone físico pelo agente",
   "ipa": {
-    "run_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39028660684",
-    "artifact_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39028660684/artifacts/12099318040",
+    "run_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39029574659",
+    "artifact_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39029574659/artifacts/12100085897",
     "artifact_name": "RNZW-unsigned-IPA",
     "filename": "RNZW-unsigned.ipa",
     "signed": false,
-    "build": "9",
-    "build_commit": "22e2c2574c9d30a7308a11736e87cf4141938f99"
+    "build": "10",
+    "build_commit": "29f2322b4864debcf7acc5d8beb62bd1314841ef"
   },
   "access_tests": "7 cenários passaram com AppState, KernelExploit e políticas reais; iOS 26.5.1 não inicia kernel incompatível; APIs nativas substituídas para teste",
   "branding": "ícone e logo adaptados da arte enviada, PNG RGB opaco 1024 × 1024; nome rnzwstore no iOS e no painel",
-  "first_launch_notice": "lógica real verificada em Swift: primeiro uso, confirmação, persistência ao reabrir, atualização sem repetição e URL do Discord corretos"
+  "first_launch_notice": "banner no topo com X e link VIP; lógica real passou em Swift: primeiro uso, migração do antigo modal, confirmação, persistência ao reabrir, atualização sem repetição e URL do Discord",
+  "localization": "246 traduções pt-BR; cobertura completa de modificações, arquivos, controles, registros e acessibilidade; parâmetros preservados; recurso compilado verificado no app",
+  "interface_cleanup": "consulta e alerta de atualização removidos da abertura; identificação da base e gesto de atribuição retirados da interface; LICENSE e THIRD_PARTY_NOTICES preservados"
 }
