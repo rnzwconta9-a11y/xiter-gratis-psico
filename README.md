@@ -2,7 +2,7 @@
 xit gratis
 
 
-## Painel RNZW
+## rnzwstore
 
 Painel iOS compacto em SwiftUI, com fundo grafite, cantos arredondados e dois menus no topo: **Opções** e **Créditos**. Um toque em 144 FPS, Aimhead Lock ou Reset Guest aplica o pacote; outro toque restaura os arquivos originais pelo motor 3105. Não há botão Executar nem seleção em lote.
 
@@ -10,9 +10,11 @@ Painel iOS compacto em SwiftUI, com fundo grafite, cantos arredondados e dois me
 - [Ver a prévia visual](docs/images/rnzw-panel-preview.png)
 - [Uso, pacotes e instruções de compilação](docs/RNZW_PANEL.md)
 - [Resultados da verificação](VALIDACAO.json)
-- [Baixar o IPA sem assinatura em Actions → Artifacts → RNZW-unsigned-IPA](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39026391287)
+- [Baixar o IPA sem assinatura em Actions → Artifacts → RNZW-unsigned-IPA](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39028660684)
 
 As cópias incluídas no painel estão preparadas para ativação direta, sem pedir senha; os pacotes enviados foram preservados em `SourcePackages/`. O quadrado reflete a aplicação ou restauração confirmada pelo motor. Oito cenários do controlador e sete de roteamento passaram em Swift com serviços nativos simulados. O build 8 corrige o bloqueio dos botões no iOS 26 causado pela exigência indevida do método de kernel. A prévia é uma referência visual em HTML. A compilação Release para arm64 passou no GitHub Actions e gerou um IPA sem assinatura; a assinatura e a execução no iPhone ainda precisam ser verificadas.
+
+O build 9 usa o nome **rnzwstore**, o novo ícone e um aviso de painel grátis exibido na primeira abertura, com acesso à versão VIP pelo Discord.
 
 Abra `ThreeOneOSFive.xcodeproj` no Xcode para compilar. Os requisitos de assinatura e compatibilidade da base continuam se aplicando.
 

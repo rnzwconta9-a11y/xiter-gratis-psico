@@ -70,7 +70,7 @@ Para compilar em um Mac local, rode `bash scripts/build-ipa.sh`. O script verifi
 
 O IPA gerado dessa forma não está assinado. Para instalar e utilizar as funções da base, ainda é necessária uma assinatura compatível com os requisitos originais do 3105. Certificados, perfis e senhas não fazem parte do repositório nem dos artefatos.
 
-Build 8 concluído: [execução #2](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39026391287). Artefato: **RNZW-unsigned-IPA** . Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.
+Build 9 concluído: [execução #3](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39028660684). Artefato: **RNZW-unsigned-IPA**. Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.
 
 
 ## Correção dos toques no iOS 26 (build 8)
@@ -82,3 +82,12 @@ A seleção do caminho agora usa `supportsKernelExploit` para o método de kerne
 As opções respondem ao toque mesmo quando há um bloqueio de acesso: exibem o motivo em vez de ficarem silenciosamente desabilitadas. Identificador de app alterado na assinatura, sistema fora da lista, preparação em andamento e falha de acesso possuem mensagens próprias. As bordas decorativas também deixam os toques passarem para os controles.
 
 `python3 dev-tests/run-access-tests.py` compilou o AppState, o KernelExploit e as políticas reais com substitutos para as APIs nativas. Sete cenários passaram, incluindo o iOS 26.5.1 sem iniciar o método de kernel. O controlador passou em oito cenários, incluindo a resposta a um toque bloqueado sem gravar arquivos. Esses testes não validam o MHA-C2 no aparelho físico.
+
+
+## Identidade rnzwstore e aviso inicial (build 9)
+
+O nome exibido na tela inicial do iOS e no cabeçalho é **rnzwstore**. A arte RNZW/Xiterz enviada foi adaptada para um ícone iOS opaco de 1024 × 1024 e também aparece no cabeçalho e na abertura do painel. O identificador técnico e o executável da base foram preservados.
+
+Na primeira abertura, o app mostra o aviso: “Isso é um painel grátis. Caso queira a versão VIP, compre aqui.” O botão **Comprar VIP** abre https://discord.gg/a4QmpBuw33; **Continuar grátis** fecha o aviso. Os dois registram que o aviso foi lido. A preferência é independente do número da versão, portanto o aviso não se repete nas aberturas seguintes nem nas atualizações que preservem os dados do aplicativo. Uma instalação com os dados apagados começa novamente como primeira abertura.
+
+O aviso é apresentado dentro do app e não solicita permissão para notificações do sistema. A lógica de primeira abertura, a persistência após uma nova instância das preferências, a não repetição após uma mudança do marcador de onboarding e o URL do botão VIP foram verificados em Swift. O build também confere o nome exibido e o identificador no app compilado.
