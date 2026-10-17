@@ -1,0 +1,50 @@
+name: Build iOS IPA
+run-name: IPA RNZW — ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [painel-rnzw]
+    paths:
+      - '.github/workflows/build-ipa.yml'
+      - 'scripts/build-ipa.sh'
+      - 'ThreeOneOSFive/**'
+      - 'ThreeOneOSFive.xcodeproj/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rnzw-ipa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compile and package unsigned IPA
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Build arm64 IPA
+        shell: bash
+        run: bash scripts/build-ipa.sh
+      - name: Upload IPA
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: RNZW-unsigned-IPA
+          path: |
+            ${{ runner.temp }}/rnzw-ios-build/Package/RNZW-unsigned.ipa
+            ${{ runner.temp }}/rnzw-ios-build/Package/RNZW-unsigned.ipa.sha256
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: RNZW-build-log
+          path: ${{ runner.temp }}/rnzw-ios-build/xcodebuild.log
+          if-no-files-found: warn
+          retention-days: 14
