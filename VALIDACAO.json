@@ -4,6 +4,14 @@
   "xcode_project": "referências de Sources e Resources verificadas; sem alteração no motor iOS",
   "packages": "originais preservados em SourcePackages; cópias públicas para toque direto; IDs, payloads e dados de substituição preservados e autenticados",
   "preview": "referência HTML compacta e escura, com testes de alternância e larguras de 320, 390 e 768 pixels; não é execução iOS",
-  "ios_build": "não executado: ambiente Linux sem Xcode e SDK iOS",
-  "device_execution": "não executada: sem dispositivo iOS compatível"
+  "ios_build": "compilação Release arm64 concluída com sucesso em runner macOS/Xcode; IPA sem assinatura e recursos verificados",
+  "device_execution": "não executada: sem dispositivo iOS compatível",
+  "ipa": {
+    "run_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138",
+    "artifact_url": "https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138/artifacts/12098163016",
+    "artifact_name": "RNZW-unsigned-IPA",
+    "filename": "RNZW-unsigned.ipa",
+    "signed": false,
+    "build_commit": "4c291ee32a004ee5d317a616d8e7825e345c3016"
+  }
 }

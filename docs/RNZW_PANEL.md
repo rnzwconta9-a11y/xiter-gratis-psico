@@ -57,4 +57,17 @@ xcodebuild -project ThreeOneOSFive.xcodeproj -scheme 3105 \
 
 No iPhone compatível, valide cada opção: primeiro toque aplica; segundo restaura os arquivos originais; reabrir mantém o estado real; uma falha não indica uma restauração inexistente. Confira também os menus, os três links e a importação manual.
 
-O ambiente de edição é Linux. A compilação completa com SDK iOS, a assinatura e o funcionamento no dispositivo ainda precisam ser verificados em Mac/iPhone. O motor original de execução, backups, validação, restauração e compatibilidade não foi alterado.
+O ambiente de edição é Linux. A compilação completa Release para arm64 foi concluída com sucesso pelo GitHub Actions em macOS/Xcode. O script confirmou o executável arm64, os três recursos .3105 e a integridade do IPA. A assinatura e o funcionamento no iPhone ainda não foram verificados. O motor original de execução, backups, validação, restauração e compatibilidade não foi alterado.
+
+
+## Gerar IPA pelo GitHub Actions
+
+O workflow **Build iOS IPA** compila o target 3105 em um runner macOS com Xcode, para arm64 e sem assinatura. Ele é acionado por alterações de código na branch `painel-rnzw` e também pode ser executado manualmente no menu Actions quando o workflow estiver disponível na branch padrão.
+
+Abra a execução em https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions e, após concluir com sucesso, baixe o artefato **RNZW-unsigned-IPA**. O ZIP do artefato contém `RNZW-unsigned.ipa` e seu SHA-256. O artefato fica disponível por 14 dias e o download pelo GitHub pode exigir login. O log de compilação é salvo separadamente, inclusive em caso de falha.
+
+Para compilar em um Mac local, rode `bash scripts/build-ipa.sh`. O script verifica a arquitetura arm64, a presença dos três pacotes e a estrutura do ZIP antes de concluir. Ele não altera o bundle identifier nem exige um certificado para a compilação.
+
+O IPA gerado dessa forma não está assinado. Para instalar e utilizar as funções da base, ainda é necessária uma assinatura compatível com os requisitos originais do 3105. Certificados, perfis e senhas não fazem parte do repositório nem dos artefatos.
+
+Compilação concluída: [execução #1](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138). Artefato: **RNZW-unsigned-IPA** (aproximadamente 2,89 MB). Faça login no GitHub para baixar o ZIP do artefato e extrair o IPA.

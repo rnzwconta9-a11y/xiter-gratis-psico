@@ -10,8 +10,9 @@ Painel iOS compacto em SwiftUI, com fundo grafite, cantos arredondados e dois me
 - [Ver a prévia visual](docs/images/rnzw-panel-preview.png)
 - [Uso, pacotes e instruções de compilação](docs/RNZW_PANEL.md)
 - [Resultados da verificação](VALIDACAO.json)
+- [Baixar o IPA sem assinatura em Actions → Artifacts → RNZW-unsigned-IPA](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/actions/runs/39025295138)
 
-As cópias incluídas no painel estão preparadas para ativação direta, sem pedir senha; os pacotes enviados foram preservados em `SourcePackages/`. O quadrado reflete a aplicação ou restauração confirmada pelo motor. Sete cenários do controlador passaram em Swift com um serviço de dispositivo simulado. A prévia é uma referência visual em HTML; a compilação completa e a execução no iPhone ainda precisam ser verificadas em Mac/iOS.
+As cópias incluídas no painel estão preparadas para ativação direta, sem pedir senha; os pacotes enviados foram preservados em `SourcePackages/`. O quadrado reflete a aplicação ou restauração confirmada pelo motor. Sete cenários do controlador passaram em Swift com um serviço de dispositivo simulado. A prévia é uma referência visual em HTML. A compilação Release para arm64 passou no GitHub Actions e gerou um IPA sem assinatura; a assinatura e a execução no iPhone ainda precisam ser verificadas.
 
 Abra `ThreeOneOSFive.xcodeproj` no Xcode para compilar. Os requisitos de assinatura e compatibilidade da base continuam se aplicando.
 
