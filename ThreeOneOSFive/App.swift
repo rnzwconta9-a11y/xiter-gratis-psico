@@ -6,10 +6,9 @@ struct ThreeOneOSFiveApp: App {
     @StateObject private var appState = AppState()
     @StateObject private var patchDraftCoordinator = PatchDraftCoordinator()
     @StateObject private var fileOperationCoordinator = FileOperationCoordinator()
-    @AppStorage(AppLanguage.storageKey) private var languageCode = AppLanguage.english.rawValue
+    private let language = AppLanguage.portuguese
     @State private var showOnboarding = OnboardingStore.shouldShow()
-    @State private var showAttribution = false
-    @State private var updateOffer: AppUpdateChecker.Offer?
+    @State private var showFreeNotice = false
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -17,15 +16,13 @@ struct ThreeOneOSFiveApp: App {
         log("app: 3105 launching — iOS \(AppInfo.osVersion) (\(AppInfo.osBuild)) \(AppInfo.machineName)")
     }
 
-    private var language: AppLanguage {
-        AppLanguage(rawValue: languageCode) ?? .english
+    private func presentFreeNoticeIfNeeded() {
+        showFreeNotice = FreePanelNoticeStore.shouldShow()
     }
 
-    private func checkForUpdate() {
-        Task {
-            guard let offer = await AppUpdateChecker.check() else { return }
-            await MainActor.run { updateOffer = offer }
-        }
+    private func closeFreeNotice() {
+        FreePanelNoticeStore.markSeen()
+        withAnimation(.easeOut(duration: 0.2)) { showFreeNotice = false }
     }
 
     var body: some Scene {
@@ -47,7 +44,7 @@ struct ThreeOneOSFiveApp: App {
                             showOnboarding = false
                         }
                         appState.detectSupport()
-                        checkForUpdate()
+                        presentFreeNoticeIfNeeded()
                     }
                     .environment(\.appLanguage, language)
                     .environment(\.locale, language.locale)
@@ -56,26 +53,19 @@ struct ThreeOneOSFiveApp: App {
                 }
             }
             .preferredColorScheme(.dark)
-            .displayIdentityAttribution(isPresented: $showAttribution, enabled: !showOnboarding)
-            .sheet(isPresented: $showAttribution) {
-                DisplayAttributionSheet()
-            }
-            .alert(item: $updateOffer) { offer in
-                Alert(
-                    title: Text(language.text("update.title")),
-                    message: Text(language.text("update.message", offer.version)),
-                    primaryButton: .default(Text(language.text("update.agree"))) {
-                        UIApplication.shared.open(offer.url)
-                    },
-                    secondaryButton: .cancel(Text(language.text("update.dismiss"))) {
-                        AppUpdateChecker.dismiss(version: offer.version)
-                    }
-                )
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if showFreeNotice && !showOnboarding {
+                    FreePanelBanner(onClose: closeFreeNotice)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                        .padding(.bottom, 4)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
             }
             .onAppear {
                 if !showOnboarding {
                     appState.detectSupport()
-                    checkForUpdate()
+                    presentFreeNoticeIfNeeded()
                 }
             }
             .onChange(of: scenePhase) { phase in

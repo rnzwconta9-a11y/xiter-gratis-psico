@@ -1,8 +1,7 @@
 import SwiftUI
+import AudioToolbox
 
 struct OnboardingView: View {
-    @Environment(\.openURL) private var openURL
-    @State private var showFreeNotice = false
     var onComplete: () -> Void
 
     var body: some View {
@@ -26,7 +25,7 @@ struct OnboardingView: View {
                         .font(.subheadline.weight(.semibold)).padding(14)
                     }
                     .buttonStyle(PanelButtonStyle(isPrimary: true))
-                    Text("RNZW MODZ · Base 3105 / YangJiii")
+                    Text("RNZW MODZ")
                         .font(.caption2).foregroundStyle(AppTheme.muted)
                 }
                 .padding(22).frame(maxWidth: 350)
@@ -40,26 +39,66 @@ struct OnboardingView: View {
         }
         .background(AppTheme.pageBackground.ignoresSafeArea())
         .preferredColorScheme(.dark)
-        .onAppear {
-            showFreeNotice = FreePanelNoticeStore.shouldShow()
-        }
-        .alert("Painel grátis", isPresented: $showFreeNotice) {
-            Button("Comprar VIP") {
-                FreePanelNoticeStore.markSeen()
-                openURL(FreePanelNoticeStore.purchaseURL)
-            }
-            Button("Continuar grátis", role: .cancel) {
-                FreePanelNoticeStore.markSeen()
-            }
-        } message: {
-            Text(FreePanelNoticeStore.message)
-        }
     }
 }
 
-/// Acknowledgement survives app updates; it is independent of onboarding's build fingerprint.
+/// Appears inside the app, below the status bar, without covering the panel controls.
+struct FreePanelBanner: View {
+    @Environment(\.openURL) private var openURL
+    var onClose: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "bell.badge.fill")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(AppTheme.accent)
+                .padding(.top, 3)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Painel grátis").font(.system(size: 13, weight: .semibold))
+                Text(FreePanelNoticeStore.message)
+                    .font(.system(size: 12)).foregroundStyle(AppTheme.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button {
+                    onClose()
+                    openURL(FreePanelNoticeStore.purchaseURL)
+                } label: {
+                    HStack(spacing: 5) {
+                        Text("Comprar VIP")
+                        Image(systemName: "arrow.up.right")
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(minHeight: 44)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Abre o Discord da rnzwstore")
+            }
+            Spacer(minLength: 0)
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(AppTheme.muted)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Fechar aviso")
+        }
+        .padding(.leading, 14).padding(.trailing, 4).padding(.vertical, 12)
+        .frame(maxWidth: 350, alignment: .leading)
+        .foregroundStyle(AppTheme.ink)
+        .background(AppTheme.panelBackground, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .stroke(AppTheme.panelBorder).allowsHitTesting(false))
+        .onAppear { AudioServicesPlaySystemSound(1007) }
+    }
+}
+
+/// Banner acknowledgement survives updates and is separate from the former modal and onboarding.
 enum FreePanelNoticeStore {
-    static let storageKey = "rnzwstore.freePanelNoticeSeen"
+    static let storageKey = "rnzwstore.freePanelBannerSeen"
     static let message = "Isso é um painel grátis. Caso queira a versão VIP, compre aqui."
     static let purchaseURL = URL(string: "https://discord.gg/a4QmpBuw33")!
 

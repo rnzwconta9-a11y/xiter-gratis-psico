@@ -219,8 +219,6 @@ struct ContentView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
                     Text("RNZW MODZ").font(.system(size: 10, weight: .semibold)).tracking(1)
-                    Text("Base 3105 · YangJiii · GPLv3")
-                        .font(.system(size: 9)).foregroundStyle(AppTheme.muted)
                 }
             }
             Spacer(minLength: 0)

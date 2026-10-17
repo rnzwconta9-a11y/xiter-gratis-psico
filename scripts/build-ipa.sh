@@ -36,6 +36,9 @@ display_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$app/In
 bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Info.plist")"
 test "$display_name" = rnzwstore
 test "$bundle_id" = com.apple.mobile.MobileHouseArrest
+test -s "$app/pt-BR.lproj/Localizable.strings"
+patch_title="$(/usr/libexec/PlistBuddy -c 'Print :patch.title' "$app/pt-BR.lproj/Localizable.strings")"
+test "$patch_title" = Modificações
 for resource in 144-fps aimhead-lock reset-guest; do
   test -s "$app/PanelPackages/$resource.3105"
 done

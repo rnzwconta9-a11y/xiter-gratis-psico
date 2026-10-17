@@ -73,6 +73,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3105P103 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		3105A010 /* 3105.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "3105.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3105A020 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		3105A021 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -338,6 +339,7 @@
 				en,
 				vi,
 				"zh-Hans",
+				"pt-BR",
 				Base,
 			);
 			mainGroup = 3105A400;
@@ -429,6 +431,7 @@
 				3105A121 /* en */,
 				3105A122 /* vi */,
 				3105B123 /* zh-Hans */,
+				3105P103 /* pt-BR */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -443,7 +446,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -477,7 +480,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
