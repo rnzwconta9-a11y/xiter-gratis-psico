@@ -1,12 +1,14 @@
 import SwiftUI
 
 enum AppTheme {
-    static let accent = Color(red: 0.78, green: 0.09, blue: 0.13)
-    static let ink = Color(red: 0.07, green: 0.07, blue: 0.08)
-    static let muted = Color(red: 0.40, green: 0.40, blue: 0.42)
-    static let panelBorder = Color(red: 0.88, green: 0.88, blue: 0.89)
-    static let pageBackground = Color.white
-    static let consoleBackground = Color(white: 0.97)
+    static let accent = Color(red: 0.91, green: 0.18, blue: 0.23)
+    static let ink = Color(white: 0.94)
+    static let muted = Color(red: 0.56, green: 0.57, blue: 0.63)
+    static let panelBorder = Color.white.opacity(0.07)
+    static let pageBackground = Color(red: 0.035, green: 0.039, blue: 0.051)
+    static let panelBackground = Color(red: 0.074, green: 0.078, blue: 0.098)
+    static let raisedBackground = Color(red: 0.115, green: 0.119, blue: 0.148)
+    static let consoleBackground = raisedBackground
     static let pageInset: CGFloat = 16
     static let rowIconSize: CGFloat = 17
     static let rowIconFrame: CGFloat = 28
@@ -18,23 +20,20 @@ enum AppTheme {
     static let selectionIconSize: CGFloat = 18
 }
 
-/// Red identifies the main action; black identifies selection and pressed state.
+/// Compact surfaces with a black active state and a restrained red outline.
 struct PanelButtonStyle: ButtonStyle {
     var isPrimary = false
     var isSelected = false
-    @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         let dark = configuration.isPressed || isSelected
-        let filled = dark || isPrimary
         return configuration.label
-            .foregroundStyle(filled ? Color.white : AppTheme.ink)
-            .background(dark ? AppTheme.ink : (isPrimary ? AppTheme.accent : Color.white),
-                        in: RoundedRectangle(cornerRadius: 6))
-            .overlay(RoundedRectangle(cornerRadius: 6)
-                .stroke(filled ? Color.clear : AppTheme.panelBorder, lineWidth: 1))
-            .opacity(isEnabled ? 1 : 0.45)
-            .contentShape(RoundedRectangle(cornerRadius: 6))
+            .foregroundStyle(AppTheme.ink)
+            .background(dark ? Color.black.opacity(0.55) : (isPrimary ? AppTheme.accent : AppTheme.raisedBackground.opacity(0.55)),
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(isSelected ? AppTheme.accent.opacity(0.40) : AppTheme.panelBorder, lineWidth: 1))
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 

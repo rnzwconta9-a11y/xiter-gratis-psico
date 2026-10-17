@@ -4,47 +4,39 @@ struct OnboardingView: View {
     var onComplete: () -> Void
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
-                Image(systemName: "scope")
-                    .font(.system(size: 38, weight: .medium))
-                    .foregroundStyle(.white)
-                    .frame(width: 76, height: 76)
-                    .background(AppTheme.accent, in: RoundedRectangle(cornerRadius: 8))
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("RNZW / EXECUTOR")
-                        .font(.system(.caption, design: .monospaced).weight(.bold)).tracking(2)
-                        .foregroundStyle(AppTheme.accent)
-                    Text("Seu painel.\nTudo à mão.")
-                        .font(.system(.largeTitle, design: .rounded).weight(.bold))
-                    Text("Três opções, um executor. Escolha os pacotes no painel ou importe seus arquivos .3105.")
-                        .font(.body).foregroundStyle(AppTheme.muted)
-                }
-                VStack(alignment: .leading, spacing: 16) {
-                    Label("Feche o app de destino antes de executar.", systemImage: "app.badge.checkmark")
-                    Label("Pacotes protegidos pedem a senha original.", systemImage: "lock.square")
-                    Label("Compatibilidade e assinatura seguem os requisitos da base 3105.", systemImage: "iphone")
-                }
-                .font(.subheadline).foregroundStyle(AppTheme.muted)
-                Button(action: onComplete) {
-                    HStack {
-                        Text("Abrir painel")
-                        Spacer()
-                        Image(systemName: "arrow.right")
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "scope").font(.title2).foregroundStyle(AppTheme.accent)
+                        Text("RNZW").font(.system(.title3, design: .rounded).weight(.bold)).tracking(2)
                     }
-                    .font(.headline).padding(18).frame(maxWidth: .infinity)
+                    Text("Um toque para ativar.\nOutro para restaurar.")
+                        .font(.system(size: 21, weight: .semibold, design: .rounded))
+                    Text("Feche o app de destino antes de usar as opções. O painel guarda os arquivos originais para restaurá-los ao desligar.")
+                        .font(.subheadline).foregroundStyle(AppTheme.muted)
+                    Button(action: onComplete) {
+                        HStack {
+                            Text("Abrir painel")
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                        }
+                        .font(.subheadline.weight(.semibold)).padding(14)
+                    }
+                    .buttonStyle(PanelButtonStyle(isPrimary: true))
+                    Text("RNZW MODZ · Base 3105 / YangJiii")
+                        .font(.caption2).foregroundStyle(AppTheme.muted)
                 }
-                .buttonStyle(PanelButtonStyle(isPrimary: true))
-                Text("RNZW MODZ · Base 3105 / YangJiii")
-                    .font(.caption2).foregroundStyle(AppTheme.muted)
+                .padding(22).frame(maxWidth: 350)
+                .foregroundStyle(AppTheme.ink)
+                .background(AppTheme.panelBackground, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(AppTheme.panelBorder))
+                .padding(20)
+                .frame(maxWidth: .infinity, minHeight: geometry.size.height)
             }
-            .frame(maxWidth: 520, alignment: .leading)
-            .padding(28).padding(.vertical, 30)
-            .frame(maxWidth: .infinity)
         }
-        .background(Color.white.ignoresSafeArea())
-        .foregroundStyle(AppTheme.ink)
-        .preferredColorScheme(.light)
+        .background(AppTheme.pageBackground.ignoresSafeArea())
+        .preferredColorScheme(.dark)
     }
 }
 

@@ -1,57 +1,60 @@
 # Painel RNZW
 
-Interface nativa em SwiftUI, com fundo branco, seleção preta e vermelho reservado à identidade e à ação principal. Os dois menus são **Opções** e **Créditos**.
+Painel SwiftUI compacto, com largura máxima de 350 pontos, fundo grafite e cantos de 24 pontos. Os dois menus, **Opções** e **Créditos**, ficam no topo. O vermelho destaca a identidade e as opções ativas; os controles ativos têm fundo preto. A altura acompanha o conteúdo, sem ocupar a tela inteira.
 
-## Pacotes incluídos
+## Ativar e restaurar
 
-| Opção | Arquivo enviado | Proteção |
-| --- | --- | --- |
-| 144 FPS | `144 FPS.3105` | Senha original, solicitada no app |
-| Aimhead Lock | `NO HEAD FFTH.3105` | Sem senha |
-| Reset Guest | `RESETAR GUEST (2).3105` | Senha original, solicitada no app |
+- **Primeiro toque na opção desligada:** aplica o pacote diretamente pelo motor 3105.
+- **Novo toque na opção ativa:** restaura os arquivos originais usando o backup do motor.
+- Durante a operação, a opção mostra progresso e os demais controles de escrita ficam bloqueados, evitando toques duplicados.
+- O quadrado só fica marcado depois que o motor confirma a aplicação. Na restauração, só desmarca depois da confirmação. Se houver falha, o estado é relido dos registros do executor e o erro é exibido.
+- Ao reabrir o painel, o estado é recuperado dos backups ativos, sem depender de uma preferência visual salva.
 
-Os três arquivos foram copiados sem alterar seu conteúdo para `ThreeOneOSFive/Resources/PanelPackages`. O projeto Xcode inclui essa pasta como recurso. A associação de NO HEAD FFTH a Aimhead Lock foi confirmada pelo solicitante; o nome na interface não muda o conteúdo do pacote.
+Não há seleção em lote, botão Executar nem botão separado de restauração. Feche o app de destino antes de tocar nas opções. Reset Guest altera os dados de convidado; para desfazer, toque novamente e aguarde a restauração do backup.
 
-## Uso
+## Pacotes
 
-1. Marque os quadrados das opções desejadas; eles ficam pretos. Marcar e desmarcar apenas muda a seleção.
-2. Feche o app de destino e toque em **Executar selecionadas**. Confirme a operação. Reset Guest tem uma mensagem específica sobre os dados de convidado.
-3. Informe, no próprio app, a senha original de cada pacote protegido. Todas as senhas e os pacotes são verificados antes de começar a aplicação. Cancelar essa preparação não aplica nenhum pacote.
-4. O executor aplica os pacotes em sequência e informa o resultado. Um erro interrompe as opções restantes; opções já concluídas são identificadas na mensagem.
-5. Para desfazer, selecione os pacotes aplicados e use **Restaurar selecionadas**. A restauração usa os backups e as verificações originais do 3105. Desmarcar uma opção não restaura arquivos.
+| Opção | Arquivo original enviado |
+| --- | --- |
+| 144 FPS | `144 FPS.3105` |
+| Aimhead Lock | `NO HEAD FFTH.3105` |
+| Reset Guest | `RESETAR GUEST (2).3105` |
 
-A mesma opção não é reaplicada enquanto houver um backup ativo, para preservar os originais. Pacotes que alteram o mesmo arquivo são recusados em uma única execução; aplique e restaure cada um separadamente.
+Os arquivos originais, com sua proteção original, ficam em `SourcePackages/`. A associação de NO HEAD FFTH a Aimhead Lock foi confirmada pelo solicitante.
 
-O botão de importação no canto superior direito abre o executor original, incluindo importação de outros `.3105`, edição, aplicação, exportação e restauração. Links de importação externos continuam sendo encaminhados a ele. O diagnóstico continua acessível no rodapé.
+Para permitir o toque direto sem pedir senha, `ThreeOneOSFive/Resources/PanelPackages/` contém cópias em modo público, suportado pelo codec original 3105. As cópias foram preparadas com as senhas fornecidas pelo solicitante, sem gravar essas senhas no código. Somente o envelope de proteção de 144 FPS e Reset Guest foi alterado: IDs, chaves de conteúdo, payloads criptografados e dados de substituição foram preservados. O Aimhead Lock já usava o modo público.
 
-## Créditos
+A validação mantém AES-GCM, fingerprints e digests. Os três pacotes fornecidos têm destinos de arquivo diferentes. O controlador também recusa uma nova ativação que sobrescreveria um arquivo de outra opção ativa, preservando a possibilidade de restauração.
+
+## Executor de arquivos e créditos
+
+O ícone de importação no cabeçalho abre o executor original, incluindo importação de outros `.3105`, edição, aplicação, exportação e restauração. Arquivos protegidos importados manualmente continuam usando o fluxo de senha original. Links de importação externos continuam funcionando e aguardam a operação atual terminar antes de abrir o executor.
+
+O menu Créditos abre:
 
 - Telegram: https://t.me/rnzwmodz
 - Discord: https://discord.gg/a4QmpBuw33
 - Tutorial: https://www.youtube.com/@rnzwstore
 
-Os botões abrem esses endereços pelo sistema. O motor 3105, seus créditos, sua licença e os avisos de terceiros foram preservados.
+O diagnóstico fica no rodapé. Licença e créditos da base foram preservados.
 
-## Compilar e validar no Mac
+## Verificação
 
-Abra `ThreeOneOSFive.xcodeproj` no Xcode. Selecione o target **3105** e configure a assinatura conforme o README da base. Não altere o bundle identifier: o fluxo de acesso original depende dele.
+`python3 dev-tests/run-toggle-tests.py` compila o código real de `PanelExecutorStore.swift` no contêiner oficial `swift:6.0.3-jammy`, substituindo Combine e as APIs de dispositivo por componentes de teste. Requer Docker. Sete cenários passaram: aplicação direta e toque repetido durante a operação; restauração dos bytes originais; falha na aplicação; falha na restauração e nova tentativa; três opções independentes e recuperação de estado ao reabrir; conflito de destino; recurso ausente.
 
-Para verificar a compilação para um dispositivo sem gerar assinatura:
+Esses testes verificam a orquestração do controlador com um serviço de dispositivo simulado. Não executam o motor iOS, a observação do Combine, o SwiftUI nem os exploits. A sintaxe dos arquivos Swift alterados, as referências do projeto Xcode e a autenticação e integridade dos três pacotes também foram verificadas separadamente.
+
+A imagem em `docs/images/rnzw-panel-preview.png` é uma referência visual em HTML, não uma captura do app iOS. A referência tem aproximadamente 350 × 344 pixels e foi verificada em larguras de tela de 320, 390 e 768 pixels.
+
+## Compilar e testar no iPhone
+
+Abra `ThreeOneOSFive.xcodeproj` no Xcode, selecione o target **3105** e configure a assinatura conforme o README da base. Não altere o bundle identifier, pois o fluxo original depende dele.
 
 ```sh
-cd /caminho/para/xiter-gratis-psico
 xcodebuild -project ThreeOneOSFive.xcodeproj -scheme 3105 \
   -configuration Debug -sdk iphoneos CODE_SIGNING_ALLOWED=NO build
 ```
 
-Esse comando verifica a compilação; uma instalação utilizável ainda exige a assinatura e um dispositivo compatível com a base. Não há certificados nem IPA assinado nesta source.
+No iPhone compatível, valide cada opção: primeiro toque aplica; segundo restaura os arquivos originais; reabrir mantém o estado real; uma falha não indica uma restauração inexistente. Confira também os menus, os três links e a importação manual.
 
-No iPhone, confira: alternância dos dois menus; quadrados pretos na seleção; abertura dos três links; importação de `.3105`; senha incorreta e cancelamento sem execução; execução com senha válida; tratamento de app ausente; restauração pelos backups. Valide cada pacote isoladamente antes de combinar opções.
-
-## Limites da verificação no ambiente de edição
-
-O ambiente disponível é Linux e não contém Xcode, SDK do iOS nem simulador. A validação aqui cobre a sintaxe com parser Swift, a estrutura do projeto e a integridade dos recursos. A compilação nativa, a assinatura, o acesso ao dispositivo e os efeitos dos pacotes no app de destino precisam ser verificados no Mac/iPhone.
-
-Reset Guest e 144 FPS foram desbloqueados para validação com as respectivas senhas fornecidas pelo solicitante; a autenticação AES-GCM e os digests dos arquivos passaram nos dois casos. Nenhuma senha foi embutida na source. O app solicita as senhas originais na primeira execução e utiliza o Chaves do iOS para guardar as chaves de conteúdo, conforme o mecanismo original. Aimhead Lock também passou pela autenticação e verificação dos digests, usando a chave pública do próprio pacote.
-
-O código de execução, criptografia, validação de caminhos, backups, restauração e compatibilidade da base não foi modificado. `PanelExecutorStore.swift` apenas conecta a interface a essas APIs existentes.
+O ambiente de edição é Linux. A compilação completa com SDK iOS, a assinatura e o funcionamento no dispositivo ainda precisam ser verificados em Mac/iPhone. O motor original de execução, backups, validação, restauração e compatibilidade não foi alterado.

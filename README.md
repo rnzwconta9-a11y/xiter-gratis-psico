@@ -4,14 +4,14 @@ xit gratis
 
 ## Painel RNZW
 
-Interface iOS em SwiftUI com fundo branco, detalhes vermelhos, seleções pretas e dois menus: **Opções** e **Créditos**. Inclui 144 FPS, Aimhead Lock e Reset Guest, conectados ao motor original 3105.
+Painel iOS compacto em SwiftUI, com fundo grafite, cantos arredondados e dois menus no topo: **Opções** e **Créditos**. Um toque em 144 FPS, Aimhead Lock ou Reset Guest aplica o pacote; outro toque restaura os arquivos originais pelo motor 3105. Não há botão Executar nem seleção em lote.
 
 - [Baixar a source desta branch em ZIP](https://github.com/rnzwconta9-a11y/xiter-gratis-psico/archive/refs/heads/painel-rnzw.zip)
 - [Ver a prévia visual](docs/images/rnzw-panel-preview.png)
 - [Uso, pacotes e instruções de compilação](docs/RNZW_PANEL.md)
 - [Resultados da verificação](VALIDACAO.json)
 
-Os pacotes 144 FPS e Reset Guest pedem suas senhas originais no aplicativo. As senhas fornecidas foram validadas e não foram gravadas na source. A prévia é uma referência visual em HTML; a compilação e a execução no iPhone ainda precisam ser verificadas em Mac/iOS.
+As cópias incluídas no painel estão preparadas para ativação direta, sem pedir senha; os pacotes enviados foram preservados em `SourcePackages/`. O quadrado reflete a aplicação ou restauração confirmada pelo motor. Sete cenários do controlador passaram em Swift com um serviço de dispositivo simulado. A prévia é uma referência visual em HTML; a compilação completa e a execução no iPhone ainda precisam ser verificadas em Mac/iOS.
 
 Abra `ThreeOneOSFive.xcodeproj` no Xcode para compilar. Os requisitos de assinatura e compatibilidade da base continuam se aplicando.
 

@@ -11,18 +11,11 @@ enum PanelFeature: String, CaseIterable, Identifiable {
         case .resetGuest: return "Reset Guest"
         }
     }
-    var subtitle: String {
+    var symbol: String {
         switch self {
-        case .fps: return "Pacote de desempenho"
-        case .aimhead: return "Pacote NO HEAD FFTH"
-        case .resetGuest: return "Redefinição de convidado"
-        }
-    }
-    var number: String {
-        switch self {
-        case .fps: return "01"
-        case .aimhead: return "02"
-        case .resetGuest: return "03"
+        case .fps: return "speedometer"
+        case .aimhead: return "scope"
+        case .resetGuest: return "arrow.counterclockwise"
         }
     }
     var packageID: UUID {
@@ -40,244 +33,112 @@ struct PanelNotice: Identifiable {
     let message: String
 }
 
-private enum PanelLoadError: Error { case missingResource, wrongPackage, passwordRequired, conflictingTargets }
-
-private struct PreparedPanelFeature {
-    let feature: PanelFeature
-    let project: PatchProject
+private enum PanelLoadError: Error {
+    case missingResource, wrongPackage, protectedResource
+    case conflictingFeature(PanelFeature)
 }
 
-/// UI orchestration only. Decoding, passwords, backup, apply and restore use the original engine.
+/// A switch reflects the engine's active backup receipt, never an optimistic selection.
 @MainActor
 final class PanelExecutorStore: ObservableObject {
-    @Published private(set) var selection: Set<PanelFeature> = []
-    @Published private(set) var results: [PanelFeature: String] = [:]
-    @Published private(set) var isBusy = false
-    @Published private(set) var isUnlocking = false
-    @Published private(set) var progress = ""
-    @Published private(set) var passwordError: String?
-    @Published var passwordFeature: PanelFeature?
+    @Published private(set) var active: Set<PanelFeature> = []
+    @Published private(set) var busyFeature: PanelFeature?
+    @Published private(set) var isRestoring = false
+    @Published private(set) var feedback: String?
     @Published var notice: PanelNotice?
-    @Published private var applied: Set<PanelFeature> = []
 
-    private var pending: [PanelFeature] = []
-    private var prepared: [PreparedPanelFeature] = []
-    private var completed: [PanelFeature] = []
-
-    var canRestoreSelection: Bool { !selection.intersection(applied).isEmpty }
-
-    func toggle(_ feature: PanelFeature) {
-        guard !isBusy else { return }
-        if selection.contains(feature) { selection.remove(feature) }
-        else { selection.insert(feature) }
-    }
+    var isBusy: Bool { busyFeature != nil }
 
     func refreshReceipts() {
         guard !isBusy else { return }
-        applied = Set(PanelFeature.allCases.filter { DevicePatchService.latestReceipt(projectID: $0.packageID) != nil })
-        for feature in PanelFeature.allCases {
-            if applied.contains(feature) { results[feature] = "Aplicado · backup disponível" }
-            else if results[feature] == "Aplicado · backup disponível" { results[feature] = nil }
+        active = Set(PanelFeature.allCases.filter {
+            DevicePatchService.latestReceipt(projectID: $0.packageID) != nil
+        })
+    }
+
+    func toggle(_ feature: PanelFeature) {
+        // Serializes writes and ignores repeated taps until the actual result is known.
+        guard !isBusy else { return }
+        refreshReceipts()
+        let receipt = DevicePatchService.latestReceipt(projectID: feature.packageID)
+        busyFeature = feature
+        isRestoring = receipt != nil
+        feedback = receipt == nil ? "Ativando \(feature.title)…" : "Restaurando \(feature.title)…"
+        Task.detached(priority: .userInitiated) { [weak self] in
+            do {
+                if let receipt {
+                    try DevicePatchService.restore(receipt: receipt)
+                } else {
+                    let project = try Self.load(feature)
+                    try Self.validateAgainstActivePackages(project, feature: feature)
+                    _ = try DevicePatchService.apply(project: project)
+                }
+                await self?.complete(feature, restoring: receipt != nil)
+            } catch {
+                await self?.fail(error, feature: feature, restoring: receipt != nil)
+            }
         }
     }
 
-    func executeSelection() {
-        guard !isBusy, !selection.isEmpty else { return }
+    private func complete(_ feature: PanelFeature, restoring: Bool) {
+        busyFeature = nil
+        isRestoring = false
         refreshReceipts()
-        // Preserve the original backup: do not stack another application over an active receipt.
-        guard selection.intersection(applied).isEmpty else {
-            notice = PanelNotice(title: "Pacote já aplicado", message: "Restaure as opções já aplicadas antes de executá-las novamente, ou desmarque essas opções.")
+        let expectedState = !restoring
+        guard active.contains(feature) == expectedState else {
+            feedback = "Confira o diagnóstico"
+            notice = PanelNotice(title: feature.title,
+                                 message: "O estado final não foi confirmado pelo executor. Confira o diagnóstico antes de tentar novamente.")
             return
         }
-        isBusy = true
-        completed = []
-        prepared = []
-        pending = PanelFeature.allCases.filter { selection.contains($0) }
-        prepareNext()
+        feedback = restoring ? "\(feature.title): original restaurado" : "\(feature.title) ativado"
     }
 
-    func cancelPreparation() {
-        guard !isUnlocking else { return }
-        passwordFeature = nil
-        passwordError = nil
-        pending = []
-        prepared = []
-        isBusy = false
-        progress = ""
-        // All password prompts precede all writes, so cancelling never applies a partial selection.
-    }
-
-    func unlock(password: String) {
-        guard let feature = passwordFeature, isBusy, !isUnlocking, !password.isEmpty else { return }
-        isUnlocking = true
-        passwordError = nil
-        Task.detached(priority: .userInitiated) { [weak self] in
-            do {
-                let item = try Self.load(feature, password: password)
-                await self?.acceptUnlocked(item)
-            } catch {
-                await self?.rejectPassword(error)
-            }
-        }
-    }
-
-    private func acceptUnlocked(_ item: PreparedPanelFeature) {
-        isUnlocking = false
-        passwordFeature = nil
-        acceptPrepared(item)
-    }
-
-    private func rejectPassword(_ error: Error) {
-        isUnlocking = false
-        passwordError = Self.message(for: error)
-    }
-
-    private func prepareNext() {
-        guard let feature = pending.first else {
-            // Independent packages must not overwrite each other's targets in one batch.
-            var targets = Set<String>()
-            for item in prepared {
-                for rule in item.project.rules {
-                    if !targets.insert(rule.bundleID + "/" + rule.relativePath).inserted {
-                        fail(PanelLoadError.conflictingTargets, feature: item.feature)
-                        return
-                    }
-                }
-            }
-            applyNext()
-            return
-        }
-        progress = "Verificando \(feature.title)…"
-        Task.detached(priority: .userInitiated) { [weak self] in
-            do {
-                let item = try Self.load(feature, password: nil)
-                await self?.acceptPrepared(item)
-            } catch PanelLoadError.passwordRequired {
-                await self?.requestPassword(for: feature)
-            } catch {
-                await self?.fail(error, feature: feature)
-            }
-        }
-    }
-
-    private func requestPassword(for feature: PanelFeature) {
-        passwordError = nil
-        passwordFeature = feature
-    }
-
-    private func acceptPrepared(_ item: PreparedPanelFeature) {
-        prepared.append(item)
-        pending.removeFirst()
-        prepareNext()
-    }
-
-    private func applyNext() {
-        guard let item = prepared.first else { finish(restoring: false); return }
-        progress = "Executando \(item.feature.title)…"
-        Task.detached(priority: .userInitiated) { [weak self] in
-            do {
-                _ = try DevicePatchService.apply(project: item.project)
-                await self?.didApply(item.feature)
-            } catch {
-                await self?.fail(error, feature: item.feature)
-            }
-        }
-    }
-
-    private func didApply(_ feature: PanelFeature) {
-        results[feature] = "Aplicado · backup disponível"
-        completed.append(feature)
-        prepared.removeFirst()
-        applyNext()
-    }
-
-    func restoreSelection() {
-        guard !isBusy, canRestoreSelection else { return }
-        isBusy = true
-        completed = []
-        // Reverse the fixed application order; the engine verifies current files before restoring.
-        pending = PanelFeature.allCases.reversed().filter { selection.contains($0) && applied.contains($0) }
-        restoreNext()
-    }
-
-    private func restoreNext() {
-        guard let feature = pending.first else { finish(restoring: true); return }
-        progress = "Restaurando \(feature.title)…"
-        Task.detached(priority: .userInitiated) { [weak self] in
-            do {
-                guard let receipt = DevicePatchService.latestReceipt(projectID: feature.packageID) else {
-                    throw PatchPackageError.restoreFailed
-                }
-                try DevicePatchService.restore(receipt: receipt)
-                await self?.didRestore(feature)
-            } catch {
-                await self?.fail(error, feature: feature)
-            }
-        }
-    }
-
-    private func didRestore(_ feature: PanelFeature) {
-        results[feature] = "Originais restaurados"
-        completed.append(feature)
-        pending.removeFirst()
-        restoreNext()
-    }
-
-    private func finish(restoring: Bool) {
-        isBusy = false
-        progress = ""
+    private func fail(_ error: Error, feature: PanelFeature, restoring: Bool) {
+        busyFeature = nil
+        isRestoring = false
         refreshReceipts()
-        notice = PanelNotice(title: restoring ? "Restauração concluída" : "Execução concluída",
-                             message: completed.map(\.title).joined(separator: ", ")
-                                + (restoring ? ": arquivos originais restaurados." : ": pacotes aplicados pelo executor."))
+        feedback = restoring ? "Restauração não concluída" : "Ativação não concluída"
+        notice = PanelNotice(title: feature.title, message: Self.message(for: error))
     }
 
-    private func fail(_ error: Error, feature: PanelFeature) {
-        results[feature] = "Não concluído · veja a mensagem"
-        isBusy = false
-        isUnlocking = false
-        progress = ""
-        pending = []
-        prepared = []
-        refreshReceipts()
-        let prefix = completed.isEmpty ? "Nenhuma opção desta execução foi concluída. "
-            : "Concluídas: \(completed.map(\.title).joined(separator: ", ")). As demais não foram concluídas. "
-        notice = PanelNotice(title: feature.title, message: prefix + Self.message(for: error))
-    }
-
-    nonisolated private static func load(_ feature: PanelFeature, password: String?) throws -> PreparedPanelFeature {
+    nonisolated private static func load(_ feature: PanelFeature) throws -> PatchProject {
         guard let url = Bundle.main.url(forResource: feature.rawValue, withExtension: "3105", subdirectory: "PanelPackages") else {
             throw PanelLoadError.missingResource
         }
         let data = try PatchProjectLibrary.readPackage(at: url)
         let summary = try PatchPackageCodec.inspect(data)
         guard summary.packageID == feature.packageID else { throw PanelLoadError.wrongPackage }
-        let decoded: DecodedPatchPackage
-        if summary.isPasswordProtected, let key = try PatchKeyStore.load(for: summary) {
-            decoded = try PatchPackageCodec.decode(data, contentKey: key)
-        } else {
-            if summary.isPasswordProtected && password == nil { throw PanelLoadError.passwordRequired }
-            decoded = try PatchPackageCodec.decode(data, password: password)
-            if summary.isPasswordProtected { try PatchKeyStore.store(decoded.contentKey, for: summary) }
+        guard !summary.isPasswordProtected else { throw PanelLoadError.protectedResource }
+        // Runtime copies use the original format's public-key mode; payload validation stays intact.
+        return try PatchPackageCodec.decode(data, password: nil).project
+    }
+
+    nonisolated private static func validateAgainstActivePackages(_ project: PatchProject, feature: PanelFeature) throws {
+        let targets = Set(project.rules.map { $0.bundleID + "/" + $0.relativePath })
+        for other in PanelFeature.allCases where other != feature {
+            guard DevicePatchService.latestReceipt(projectID: other.packageID) != nil else { continue }
+            let otherProject = try load(other)
+            if otherProject.rules.contains(where: { targets.contains($0.bundleID + "/" + $0.relativePath) }) {
+                throw PanelLoadError.conflictingFeature(other)
+            }
         }
-        return PreparedPanelFeature(feature: feature, project: decoded.project)
     }
 
     nonisolated private static func message(for error: Error) -> String {
         if let error = error as? PanelLoadError {
             switch error {
-            case .missingResource: return "O pacote não foi incluído no app. Verifique PanelPackages nos recursos do projeto Xcode."
+            case .missingResource: return "O pacote não está disponível nesta instalação. Instale a versão completa do painel."
             case .wrongPackage: return "O arquivo não corresponde à opção escolhida."
-            case .passwordRequired: return "Digite a senha original deste pacote."
-            case .conflictingTargets: return "Os pacotes selecionados alteram o mesmo arquivo. Execute e restaure cada opção separadamente. Nenhuma alteração foi feita."
+            case .protectedResource: return "Esta instalação contém um pacote que não foi preparado para ativação direta."
+            case .conflictingFeature(let other): return "Desative \(other.title) antes de ativar esta opção: os pacotes alteram o mesmo arquivo."
             }
         }
         if let error = error as? PatchPackageError {
             switch error {
-            case .invalidPasswordOrCorruptedPackage: return "Senha incorreta ou arquivo corrompido. Confira a senha original do pacote."
-            case .targetAppUnavailable: return "App de destino indisponível. Verifique se está instalado e se o executor tem acesso ao dispositivo."
-            case .keychainFailed: return "Não foi possível acessar o Chaves do iOS para desbloquear o pacote."
-            case .restoreFailed: return "Não foi possível restaurar com segurança. Os arquivos ou os backups podem ter mudado."
+            case .invalidPasswordOrCorruptedPackage: return "O pacote não passou pela verificação de integridade."
+            case .targetAppUnavailable: return "O app de destino está indisponível. Verifique se está instalado e se o executor tem acesso ao dispositivo."
+            case .restoreFailed: return "Não foi possível restaurar com segurança. Os arquivos ou os backups podem ter mudado. A opção não será indicada como desligada sem confirmar a restauração."
             case .applyFailed: return "O executor não concluiu a aplicação. Consulte o diagnóstico."
             default: return "O pacote não passou pela validação do executor. Consulte o diagnóstico."
             }

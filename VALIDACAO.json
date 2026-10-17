@@ -1,11 +1,9 @@
 {
-  "swift_syntax": "5 arquivos alterados passaram no parser tree-sitter Swift; não é compilação nativa",
-  "xcode_project": "OpenStep válido; todas as referências de Sources e Resources resolvidas",
-  "original_engine": "preservado, comparado byte a byte com o ZIP enviado",
-  "packages": "conteúdo idêntico aos anexos; fingerprints, AES-GCM e digests dos três pacotes verificados",
-  "reset_guest": "senha fornecida validada; nenhuma senha embutida na source",
-  "144_fps": "senha fornecida validada; nenhuma senha embutida na source; pacote continua protegido",
+  "controller_tests": "7 cenários passaram em Swift 6.0.3, linguagem Swift 5, usando o controlador real com Combine e serviço de dispositivo simulados",
+  "swift_syntax": "5 arquivos Swift alterados passaram no parser; o controlador também compilou no harness de testes",
+  "xcode_project": "referências de Sources e Resources verificadas; sem alteração no motor iOS",
+  "packages": "originais preservados em SourcePackages; cópias públicas para toque direto; IDs, payloads e dados de substituição preservados e autenticados",
+  "preview": "referência HTML compacta e escura, com testes de alternância e larguras de 320, 390 e 768 pixels; não é execução iOS",
   "ios_build": "não executado: ambiente Linux sem Xcode e SDK iOS",
-  "device_execution": "não executada: sem dispositivo iOS compatível",
-  "preview": "referência HTML da interface; não representa execução do aplicativo iOS"
+  "device_execution": "não executada: sem dispositivo iOS compatível"
 }
